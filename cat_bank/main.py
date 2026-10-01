@@ -42,8 +42,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--match-threshold",
         type=float,
-        default=0.72,
+        default=0.85,
         help="Min cosine similarity to accept a name",
+    )
+    parser.add_argument(
+        "--match-margin",
+        type=float,
+        default=0.04,
+        help="Min gap between top and second-best scores to accept a name",
     )
     parser.add_argument(
         "--enroll-count",
@@ -166,6 +172,7 @@ def main() -> int:
     recognizer = CatRecognizer(
         bank=bank,
         match_threshold=args.match_threshold,
+        margin=args.match_margin,
         device=args.device,
     )
 

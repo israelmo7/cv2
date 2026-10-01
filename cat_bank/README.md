@@ -68,8 +68,9 @@ Enrollment happens **while streaming** — no separate photo upload step.
 
 - Enroll 8+ crops (default) with the cat facing different angles  
 - Keep lighting similar between enrollment and recognition  
-- Raise `--match-threshold` (e.g. `0.78`) if names get mixed up  
-- Lower it (e.g. `0.65`) if true matches show as `Unknown`
+- Raise `--match-threshold` (default `0.85`) if names get mixed up  
+- Lower it (e.g. `0.78`) if true matches show as `Unknown`  
+- `--match-margin` (default `0.04`) rejects IDs when two enrolled cats score too close
 
 ## Headless smoke test
 

@@ -17,11 +17,14 @@ class CatRecognizer:
     def __init__(
         self,
         bank: CatBank,
-        match_threshold: float = 0.72,
+        match_threshold: float = 0.85,
+        margin: float = 0.04,
         device: str | None = None,
     ) -> None:
         self.bank = bank
         self.match_threshold = match_threshold
+        # Require the top name to beat the runner-up by this margin (reduces lookalike false IDs)
+        self.margin = margin
         if device:
             self.device = torch.device(device)
         else:
@@ -74,22 +77,24 @@ class CatRecognizer:
         return sorted(self._gallery.keys(), key=str.lower)
 
     def match(self, crop_bgr: np.ndarray) -> tuple[str, float]:
-        """Return (name, score). Name is 'Unknown' when below threshold."""
+        """Return (name, score). Name is 'Unknown' when below threshold/margin."""
         if not self._gallery:
             return "Unknown", 0.0
 
         query = self.embed(crop_bgr)
-        best_name = "Unknown"
-        best_score = -1.0
+        ranked: list[tuple[str, float]] = []
         for name, vectors in self._gallery.items():
             # Max cosine similarity against that cat's references
-            scores = vectors @ query
-            score = float(np.max(scores))
-            if score > best_score:
-                best_score = score
-                best_name = name
+            score = float(np.max(vectors @ query))
+            ranked.append((name, score))
+        ranked.sort(key=lambda item: item[1], reverse=True)
+
+        best_name, best_score = ranked[0]
+        second_score = ranked[1][1] if len(ranked) > 1 else 0.0
 
         if best_score < self.match_threshold:
+            return "Unknown", best_score
+        if len(ranked) > 1 and (best_score - second_score) < self.margin:
             return "Unknown", best_score
         return best_name, best_score
 
