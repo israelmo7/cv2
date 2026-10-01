@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.pt
+*.onnx
+.Python
+.venv/
+venv/
+cats_bank/*
+!cats_bank/.gitkeep
